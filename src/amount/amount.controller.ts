@@ -21,4 +21,10 @@ export class AmountController {
   async getAmount(@CurrentAccount() user: User) {
     return this.amountService.getAmount(user.id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('reset')
+  async resetAmount(@CurrentAccount() user: User) {
+    return this.amountService.reset(user.id);
+  }
 }

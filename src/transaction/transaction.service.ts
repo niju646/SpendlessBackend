@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from './entity/transaction.entity';
 import { Category } from 'src/categories/entity/category.entity';
@@ -6,6 +10,7 @@ import { Repository } from 'typeorm';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { AmountService } from 'src/amount/amount.service';
+import { Amount } from 'src/amount/entity/amount.entity';
 
 @Injectable()
 export class TransactionService {
@@ -14,8 +19,10 @@ export class TransactionService {
     private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Amount)
+    private readonly amountRepository: Repository<Amount>,
     private readonly amountService: AmountService,
-  ) { }
+  ) {}
 
   // Create transaction
   async create(dto: CreateTransactionDto, userId: number) {
@@ -25,6 +32,16 @@ export class TransactionService {
 
     if (!category) {
       throw new NotFoundException('Category not found');
+    }
+
+    const userAmount = await this.amountRepository.findOne({
+      where: { userId },
+    });
+
+    if (!userAmount || Number(userAmount.amount) <= 0) {
+      throw new BadRequestException(
+        'Insufficient balance. Please add amount first.',
+      );
     }
 
     const transaction = this.transactionRepository.create({
@@ -176,5 +193,4 @@ export class TransactionService {
       message: 'Transaction deleted successfully',
     };
   }
-
 }

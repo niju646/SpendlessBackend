@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Amount } from './entity/amount.entity';
 import { Repository } from 'typeorm';
@@ -77,5 +77,29 @@ export class AmountService {
     amount.amount = Number(amount.amount) + Number(value);
 
     return this.amountRepository.save(amount);
+  }
+
+  //amount reset to zero
+  async reset(userId: number) {
+    let amount = await this.amountRepository.findOne({
+      where: { userId },
+    });
+
+    if (!amount) {
+      // if no record exists, create one with 0
+      amount = this.amountRepository.create({
+        userId,
+        amount: 0,
+      });
+    } else {
+      amount.amount = 0;
+    }
+
+    const savedAmount = await this.amountRepository.save(amount);
+
+    return {
+      message: 'Amount reset to zero successfully',
+      data: savedAmount,
+    };
   }
 }

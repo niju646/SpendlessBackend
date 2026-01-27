@@ -24,7 +24,7 @@ import { AmountModule } from './amount/amount.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'mysql',
+        type: 'postgres',
         host: config.get<string>('DB_HOST'),
         port: parseInt(config.get<string>('DB_PORT')!, 10),
         username: config.get<string>('DB_USER'),
@@ -32,6 +32,9 @@ import { AmountModule } from './amount/amount.module';
         database: config.get<string>('DB_NAME'),
         synchronize: true,
         autoLoadEntities: true,
+        ssl: {
+          rejectUnauthorized: false, // IMPORTANT for Render
+        },
 
         // synchronize: config.get<string>('DB_SYNC') === 'true',
         // logging: config.get<string>('DB_LOGGING') === 'true',

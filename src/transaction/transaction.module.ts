@@ -6,11 +6,15 @@ import { TransactionService } from './transaction.service';
 import { TransactionController } from './transaction.controller';
 import { User } from 'src/user/entity/user.entity';
 import { AmountModule } from 'src/amount/amount.module';
+import { Amount } from 'src/amount/entity/amount.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Category, Transaction, User]), AmountModule],
+  imports: [
+    TypeOrmModule.forFeature([Category, Transaction, User, Amount]),
+    AmountModule,
+  ],
   controllers: [TransactionController],
   providers: [TransactionService],
   exports: [TransactionService],
 })
-export class TransactionModule { }
+export class TransactionModule {}
