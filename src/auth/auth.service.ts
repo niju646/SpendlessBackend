@@ -14,6 +14,8 @@ import { JwtPayload } from 'src/auth/interfaces/jwt.interface';
 import { LoginResponse } from 'src/auth/interfaces/login-response.interface';
 import { User } from 'src/user/entity/user.entity';
 import { Person } from 'src/user/entity/person.entity';
+import admin from 'src/firebase/firebase-admin';
+import Role from 'src/common/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -85,11 +87,48 @@ export class AuthService {
       refreshToken: refreshToken,
       user: {
         id: user.id,
-        name:user.name,
+        name: user.name,
         phone: user.phone,
         type: user.role,
       },
     };
+  }
+
+  //google login
+  async googleLogin(idToken: string): Promise<LoginResponse> {
+    try {
+      // Verify Firebase token
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+      const email = decodedToken.email;
+      const name = decodedToken.name;
+
+      if (!email) {
+        throw new UnauthorizedException('Invalid Google token');
+      }
+
+      //Check if user exists (use email instead of phone)
+      let user = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      if (!user) {
+        user = this.userRepository.create({
+          email: email,
+          name: name,
+          password: '',
+          role: Role.USER,
+          isActive: true,
+        });
+
+        await this.userRepository.save(user);
+      }
+
+      //Generate your JWT
+      return this.login(user);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid Google token');
+    }
   }
 
   async refreshToken(refreshToken: string): Promise<{

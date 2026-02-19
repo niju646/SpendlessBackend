@@ -10,8 +10,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { AuthModule } from './auth/auth.module';
-import { AmountService } from './amount/amount.service';
-import { AmountController } from './amount/amount.controller';
 import { AmountModule } from './amount/amount.module';
 
 @Module({
@@ -67,4 +65,4 @@ import { AmountModule } from './amount/amount.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
